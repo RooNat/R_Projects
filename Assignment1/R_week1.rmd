@@ -1,0 +1,174 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+The code chunk appears:
+```{r}
+x<-c(3,7,4,2,1,2,-4,-5)
+x
+```
+```{r}
+y<-seq(5) #generate a sequence
+y
+```
+```{r}
+x[3] #access a element of a vector
+```
+```{r}
+x[c(2,3)]
+```
+```{r}
+x[1:4]   #access the first four element like this
+```
+```{r}
+z<-c("Bristol","Bath","London")   #a vector of strings
+z
+```
+```{r}
+w<-c(TRUE,FALSE,TRUE,FALSE)  #a vector og Booleans
+w
+```
+```{r}
+a<-c(TRUE,3,"Bristol")   #You can't have a vector of mixed type!!!!
+a
+#they are all characters
+```
+```{r}
+mode(a)  # You can test the type like this
+```
+```{r}
+M<-matrix(seq(10),2,5)
+M
+#generate a 2 by 5 matrix
+```
+```{r}
+M[2,3] #The third element of the second row
+```
+```{r}
+M[,4]
+```
+```{r}
+is.vector(M[2,])
+```
+```{r}
+first_list<-list(TRUE,3,"Bristol")  # be different from vector, lists can be of mixed type
+first_list
+```
+```{r}
+second_list<-list(t_value=TRUE,num_value=3,city="Bristol")
+second_list$t_value
+```
+```{r}
+second_list$num_value
+```
+```{r}
+second_list$city
+```
+
+## Data frames are powerful objects for representing and manipulating **tabular data**
+```{r}
+city_name<-c("Bristol","Manchester","Birmingham","London")
+population<-c(0.5,0.5,1,9)
+first_data_frame<-data.frame(city_name,population)
+first_data_frame
+```
+
+## Arithmetic operations
+```{r}
+((4+2-1)*4/2)^2
+```
+```{r}
+a<-matrix(sample(1:10,6,replace=T),2,3) #a random 2 by 3 matrix
+a
+b<-matrix(sample(1:10,6,replace=T),2,3)
+b
+a*b
+```
+```{r}
+a%*%t(b)
+# t(b) computes the transpose of b
+#%*% performs matrix multiplication
+```
+
+## Boolean operations
+**NOT(complement)**
+**AND(conjunction)**
+**OR(disjunction)**
+**XOR(exclusive disjunction)**
+```{r}
+a<-c(TRUE,TRUE,FALSE,FALSE)
+b<-c(TRUE,FALSE,TRUE,FALSE)
+!a
+```
+```{r}
+a&b
+```
+```{r}
+a|b
+```
+```{r}
+xor(a,b)
+```
+
+## Define a function
+```{r}
+is_prime<-function(num){
+  stopifnot(is.numeric(num),num%%1==0,num>0)
+
+  t_val<-TRUE
+
+  if(num<2){
+    t_val<-FALSE
+  }else if(num>2){
+    for(i in 2:sqrt(num)){
+        if(num%%i==0){
+            t_val<-FALSE
+            break
+        }
+    }
+  }
+  return(t_val)
+}
+is_prime(39)
+
+```
+
+## Call-by-value semantics
+```{r}
+a<-seq(5,2)
+demo_func_1<-function(x){
+  x[2]<- -10
+  print(x)
+}
+demo_func_1(a)
+a
+```
+
+## Lazy evaluation
+```{r}
+subtraction_function<-function(num_to_sub){
+  output_function<-function(x){
+    return (x-num_to_sub)
+  }
+  return (output_function)
+}
+a<-1
+f1<-subtraction_function(a)
+f1
+print(f1(2))
+```
+
+```{r}
+a<-2
+print(f1(2))
+```
+```{r}
+b<-1
+f2<-subtraction_function(b)
+b<-2  # modify the value of b
+print(f2(2))
+```
