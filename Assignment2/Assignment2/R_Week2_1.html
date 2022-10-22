@@ -13,7 +13,7 @@
 
 <meta name="date" content="2022-10-11" />
 
-<title>Data Wrangling</title>
+<title>Tidy Data and Iteration</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -356,37 +356,43 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Data Wrangling</h1>
+<h1 class="title toc-ignore">Tidy Data and Iteration</h1>
 <h4 class="author">YujieWang</h4>
 <h4 class="date">2022-10-11</h4>
 
 </div>
 
 
-<div id="data-wrangling" class="section level2">
-<h2>Data Wrangling</h2>
 <ul>
-<li><p>Basic wrangling operations：Selecting,
-filtering,mutating,arranging(sort),summarizing,joining…</p></li>
-<li><p>The <em>dplyr</em> packages、<em>tidyverse</em> packages</p></li>
-<li><p><strong>Case study:the Palmer penguins data set</strong></p></li>
+<li>tidy data</li>
+<li>reshape data frames</li>
+<li>uniting and separating columns</li>
+<li>use the <em>map</em> function for efficient iteration</li>
+<li>handling missing data</li>
 </ul>
-<pre class="r"><code>library(palmerpenguins)
-head(penguins)</code></pre>
-<pre><code>## # A tibble: 6 × 8
-##   species island    bill_length_mm bill_depth_mm flipper_l…¹ body_…² sex    year
-##   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;         &lt;dbl&gt;       &lt;int&gt;   &lt;int&gt; &lt;fct&gt; &lt;int&gt;
-## 1 Adelie  Torgersen           39.1          18.7         181    3750 male   2007
-## 2 Adelie  Torgersen           39.5          17.4         186    3800 fema…  2007
-## 3 Adelie  Torgersen           40.3          18           195    3250 fema…  2007
-## 4 Adelie  Torgersen           NA            NA            NA      NA &lt;NA&gt;   2007
-## 5 Adelie  Torgersen           36.7          19.3         193    3450 fema…  2007
-## 6 Adelie  Torgersen           39.3          20.6         190    3650 male   2007
-## # … with abbreviated variable names ¹​flipper_length_mm, ²​body_mass_g</code></pre>
-<div id="selecting-columns" class="section level3">
-<h3>1. Selecting columns</h3>
-<p><strong>Select columns</strong></p>
-<pre class="r"><code>library(dplyr)</code></pre>
+<div id="tidy-data" class="section level2">
+<h2>Tidy data</h2>
+<div id="what-is-tidy-data" class="section level3">
+<h3>What is tidy data?</h3>
+<ul>
+<li>Each column corresponds to a variable</li>
+<li>Each row corresponds to a specific and unique observation</li>
+</ul>
+</div>
+<div id="why-tidy-data" class="section level3">
+<h3>Why tidy data?</h3>
+<ul>
+<li>Uniform formats across the rows and columns</li>
+<li>Observations(that are needed by the process of statistical
+analysis)</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Reshaping data:<strong>narrow data</strong> to <strong>wide
+data</strong> and vice versa</li>
+</ol>
+<pre class="r"><code># create summary data
+library(palmerpenguins)
+library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
 <pre><code>## The following objects are masked from &#39;package:stats&#39;:
@@ -395,360 +401,113 @@ head(penguins)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>penguins2&lt;-select(penguins,species,bill_length_mm,body_mass_g,flipper_length_mm)
-print(penguins2)</code></pre>
-<pre><code>## # A tibble: 344 × 4
-##    species bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Adelie            39.1        3750               181
-##  2 Adelie            39.5        3800               186
-##  3 Adelie            40.3        3250               195
-##  4 Adelie            NA            NA                NA
-##  5 Adelie            36.7        3450               193
-##  6 Adelie            39.3        3650               190
-##  7 Adelie            38.9        3625               181
-##  8 Adelie            39.2        4675               195
-##  9 Adelie            34.1        3475               193
-## 10 Adelie            42          4250               190
-## # … with 334 more rows</code></pre>
-<p><strong>remove several columns</strong></p>
-<pre class="r"><code>penguins2_1&lt;-select(penguins,-species,-bill_length_mm,-body_mass_g)
-print(penguins2_1)</code></pre>
-<pre><code>## # A tibble: 344 × 5
-##    island    bill_depth_mm flipper_length_mm sex     year
-##    &lt;fct&gt;             &lt;dbl&gt;             &lt;int&gt; &lt;fct&gt;  &lt;int&gt;
-##  1 Torgersen          18.7               181 male    2007
-##  2 Torgersen          17.4               186 female  2007
-##  3 Torgersen          18                 195 female  2007
-##  4 Torgersen          NA                  NA &lt;NA&gt;    2007
-##  5 Torgersen          19.3               193 female  2007
-##  6 Torgersen          20.6               190 male    2007
-##  7 Torgersen          17.8               181 female  2007
-##  8 Torgersen          19.6               195 male    2007
-##  9 Torgersen          18.1               193 &lt;NA&gt;    2007
-## 10 Torgersen          20.2               190 &lt;NA&gt;    2007
-## # … with 334 more rows</code></pre>
-</div>
-<div id="filtering-rows" class="section level3">
-<h3>2. Filtering rows</h3>
-<p>Extracting a subset of rows(while the columns are unchanged)</p>
-<pre class="r"><code>filter(penguins2,species==&#39;Gentoo&#39;)</code></pre>
-<pre><code>## # A tibble: 124 × 4
-##    species bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Gentoo            46.1        4500               211
-##  2 Gentoo            50          5700               230
-##  3 Gentoo            48.7        4450               210
-##  4 Gentoo            50          5700               218
-##  5 Gentoo            47.6        5400               215
-##  6 Gentoo            46.5        4550               210
-##  7 Gentoo            45.4        4800               211
-##  8 Gentoo            46.7        5200               219
-##  9 Gentoo            43.3        4400               209
-## 10 Gentoo            46.8        5150               215
-## # … with 114 more rows</code></pre>
-<p>Add multiple conditions:use &amp;</p>
-<pre class="r"><code>filter(penguins2,species==&#39;Gentoo&#39; &amp; body_mass_g&gt;5000)</code></pre>
-<pre><code>## # A tibble: 61 × 4
-##    species bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Gentoo            50          5700               230
-##  2 Gentoo            50          5700               218
-##  3 Gentoo            47.6        5400               215
-##  4 Gentoo            46.7        5200               219
-##  5 Gentoo            46.8        5150               215
-##  6 Gentoo            49          5550               216
-##  7 Gentoo            48.4        5850               213
-##  8 Gentoo            49.3        5850               217
-##  9 Gentoo            49.2        6300               221
-## 10 Gentoo            48.7        5350               222
-## # … with 51 more rows</code></pre>
-<div id="combining-filter-select-functions" class="section level4">
-<h4>Combining filter &amp; select functions</h4>
-<p>The following statements are equivalent:</p>
-<pre class="r"><code>select(filter(penguins2,species==&#39;Gentoo&#39;),species,bill_length_mm,body_mass_g)</code></pre>
-<pre><code>## # A tibble: 124 × 3
-##    species bill_length_mm body_mass_g
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;
-##  1 Gentoo            46.1        4500
-##  2 Gentoo            50          5700
-##  3 Gentoo            48.7        4450
-##  4 Gentoo            50          5700
-##  5 Gentoo            47.6        5400
-##  6 Gentoo            46.5        4550
-##  7 Gentoo            45.4        4800
-##  8 Gentoo            46.7        5200
-##  9 Gentoo            43.3        4400
-## 10 Gentoo            46.8        5150
-## # … with 114 more rows</code></pre>
-<pre class="r"><code>penguins2%&gt;%filter(species==&#39;Gentoo&#39;)%&gt;%select(species,bill_length_mm,body_mass_g)</code></pre>
-<pre><code>## # A tibble: 124 × 3
-##    species bill_length_mm body_mass_g
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;
-##  1 Gentoo            46.1        4500
-##  2 Gentoo            50          5700
-##  3 Gentoo            48.7        4450
-##  4 Gentoo            50          5700
-##  5 Gentoo            47.6        5400
-##  6 Gentoo            46.5        4550
-##  7 Gentoo            45.4        4800
-##  8 Gentoo            46.7        5200
-##  9 Gentoo            43.3        4400
-## 10 Gentoo            46.8        5150
-## # … with 114 more rows</code></pre>
-</div>
-<div id="simplifying-codes-with-the-pipe-operater" class="section level4">
-<h4>Simplifying codes with the pipe operater</h4>
-<p>To chain multiple operations: x%&lt;% f1(a)%&lt;%f2(b)%&lt;%f3(c) =
-f3(f2(f1(x,a),b),c)</p>
-</div>
-</div>
-<div id="creating-and-renaming-columns" class="section level3">
-<h3>3. Creating and renaming columns</h3>
-<ul>
-<li>using <em>mutate()</em> function</li>
-<li>create a new column flipper_bill_radtio</li>
-</ul>
-<pre class="r"><code># create columns
-penguins2%&gt;%mutate(flipper_bill_ratio=flipper_length_mm/bill_length_mm)</code></pre>
-<pre><code>## # A tibble: 344 × 5
-##    species bill_length_mm body_mass_g flipper_length_mm flipper_bill_ratio
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;              &lt;dbl&gt;
-##  1 Adelie            39.1        3750               181               4.63
-##  2 Adelie            39.5        3800               186               4.71
-##  3 Adelie            40.3        3250               195               4.84
-##  4 Adelie            NA            NA                NA              NA   
-##  5 Adelie            36.7        3450               193               5.26
-##  6 Adelie            39.3        3650               190               4.83
-##  7 Adelie            38.9        3625               181               4.65
-##  8 Adelie            39.2        4675               195               4.97
-##  9 Adelie            34.1        3475               193               5.66
-## 10 Adelie            42          4250               190               4.52
-## # … with 334 more rows</code></pre>
-<ul>
-<li>using <em>rename()</em> function</li>
-</ul>
-<pre class="r"><code># rename an existing column
-penguins2%&gt;% rename(f_1_m=flipper_length_mm)</code></pre>
-<pre><code>## # A tibble: 344 × 4
-##    species bill_length_mm body_mass_g f_1_m
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt; &lt;int&gt;
-##  1 Adelie            39.1        3750   181
-##  2 Adelie            39.5        3800   186
-##  3 Adelie            40.3        3250   195
-##  4 Adelie            NA            NA    NA
-##  5 Adelie            36.7        3450   193
-##  6 Adelie            39.3        3650   190
-##  7 Adelie            38.9        3625   181
-##  8 Adelie            39.2        4675   195
-##  9 Adelie            34.1        3475   193
-## 10 Adelie            42          4250   190
-## # … with 334 more rows</code></pre>
-</div>
-<div id="sorting-the-rows" class="section level3">
-<h3>4. Sorting the rows</h3>
-<ul>
-<li>using <em>arrange()</em> function</li>
-<li>in ascending order</li>
-<li>in descending order, with <em>desc()</em></li>
-</ul>
-<pre class="r"><code>penguins2 %&gt;% arrange(bill_length_mm)</code></pre>
-<pre><code>## # A tibble: 344 × 4
-##    species bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Adelie            32.1        3050               188
-##  2 Adelie            33.1        2900               178
-##  3 Adelie            33.5        3600               190
-##  4 Adelie            34          3400               185
-##  5 Adelie            34.1        3475               193
-##  6 Adelie            34.4        3325               184
-##  7 Adelie            34.5        2900               187
-##  8 Adelie            34.6        4400               198
-##  9 Adelie            34.6        3200               189
-## 10 Adelie            35          3450               190
-## # … with 334 more rows</code></pre>
-<p>In desending order:</p>
-<pre class="r"><code>penguins2%&gt;% arrange(desc(bill_length_mm))</code></pre>
-<pre><code>## # A tibble: 344 × 4
-##    species   bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;              &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Gentoo              59.6        6050               230
-##  2 Chinstrap           58          3700               181
-##  3 Gentoo              55.9        5600               228
-##  4 Chinstrap           55.8        4000               207
-##  5 Gentoo              55.1        5850               230
-##  6 Gentoo              54.3        5650               231
-##  7 Chinstrap           54.2        4300               201
-##  8 Chinstrap           53.5        4500               205
-##  9 Gentoo              53.4        5500               219
-## 10 Chinstrap           52.8        4550               205
-## # … with 334 more rows</code></pre>
-</div>
-<div id="summarizing-data" class="section level3">
-<h3>5. Summarizing data</h3>
-<ul>
-<li>summarizing a data frame into just one value or a vector.</li>
-<li>eg. compute the mean,median（中间值）,sum,standard deviation…</li>
-<li>using <em>summarize()</em> function</li>
-</ul>
-<pre class="r"><code>penguins2%&gt;% summarize(num_rows=n(),avg_weight_kg=mean(body_mass_g/1000,na.rm=TRUE),avg_flipper_bill_ratio=mean(flipper_length_mm/bill_length_mm,na.rm=TRUE))</code></pre>
-<pre><code>## # A tibble: 1 × 3
-##   num_rows avg_weight_kg avg_flipper_bill_ratio
-##      &lt;int&gt;         &lt;dbl&gt;                  &lt;dbl&gt;
-## 1      344          4.20                   4.62</code></pre>
-<div id="group-the-rows-when-summarizing" class="section level4">
-<h4>Group the rows when summarizing</h4>
-<ul>
-<li>use the function <strong>group_by()</strong> function</li>
-</ul>
-<pre class="r"><code>penguins2%&gt;%group_by(species)</code></pre>
-<pre><code>## # A tibble: 344 × 4
-## # Groups:   species [3]
-##    species bill_length_mm body_mass_g flipper_length_mm
-##    &lt;fct&gt;            &lt;dbl&gt;       &lt;int&gt;             &lt;int&gt;
-##  1 Adelie            39.1        3750               181
-##  2 Adelie            39.5        3800               186
-##  3 Adelie            40.3        3250               195
-##  4 Adelie            NA            NA                NA
-##  5 Adelie            36.7        3450               193
-##  6 Adelie            39.3        3650               190
-##  7 Adelie            38.9        3625               181
-##  8 Adelie            39.2        4675               195
-##  9 Adelie            34.1        3475               193
-## 10 Adelie            42          4250               190
-## # … with 334 more rows</code></pre>
-<ul>
-<li>group and the summarize</li>
-</ul>
-<pre class="r"><code>penguins2%&gt;%group_by(species)%&gt;%summarize(num_rows=n(),avg_weight_kg=mean(body_mass_g/1000,na.rm=TRUE),avg_flipper_bill_ratio=mean(flipper_length_mm/bill_length_mm,na.rm=TRUE))</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching packages
+## ───────────────────────────────────────
+## tidyverse 1.3.2 ──</code></pre>
+<pre><code>## ✔ ggplot2 3.3.6     ✔ purrr   0.3.5
+## ✔ tibble  3.1.8     ✔ stringr 1.4.1
+## ✔ tidyr   1.2.1     ✔ forcats 0.5.2
+## ✔ readr   2.1.3     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code># this is a wide data
+penguins_summary&lt;-penguins%&gt;%group_by(species)%&gt;%summarize(bill=round(mean(bill_length_mm,na.rm=TRUE),digits=1),flipper=round(mean(flipper_length_mm,na.rm=TRUE),digits=1),weight=round(mean(body_mass_g,na.rm=TRUE),digits=1))
+
+print(penguins_summary)</code></pre>
 <pre><code>## # A tibble: 3 × 4
-##   species   num_rows avg_weight_kg avg_flipper_bill_ratio
-##   &lt;fct&gt;        &lt;int&gt;         &lt;dbl&gt;                  &lt;dbl&gt;
-## 1 Adelie         152          3.70                   4.92
-## 2 Chinstrap       68          3.73                   4.02
-## 3 Gentoo         124          5.08                   4.58</code></pre>
-</div>
-<div id="column-wise-operations-with-across" class="section level4">
-<h4>Column-wise operations with across()</h4>
-<p>suppose that we want to compute the number of NA(not available)
-values in each column, which can be done via: 计算NA的数量</p>
-<pre class="r"><code>Num_NAs&lt;-penguins2%&gt;%summarize(species=sum(is.na(species)),bill_length_mm=sum(is.na(bill_length_mm)),body_mass_g=sum(is.na(body_mass_g)),flipper_length_mm=sum(is.na(flipper_length_mm)))
-print(Num_NAs)</code></pre>
-<pre><code>## # A tibble: 1 × 4
-##   species bill_length_mm body_mass_g flipper_length_mm
-##     &lt;int&gt;          &lt;int&gt;       &lt;int&gt;             &lt;int&gt;
-## 1       0              2           2                 2</code></pre>
+##   species    bill flipper weight
+##   &lt;fct&gt;     &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Adelie     38.8    190   3701.
+## 2 Chinstrap  48.8    196.  3733.
+## 3 Gentoo     47.5    217.  5076</code></pre>
 <ul>
-<li>Use across() to perform column-wise
-operations,执行结果与上面相同</li>
-<li>~sum(is.na(.x)) id equivalent to function(x){(sum(is.na(x)))}</li>
+<li><strong>Create narrow data</strong></li>
 </ul>
-<pre class="r"><code>Num_NAs&lt;-penguins2%&gt;%summarize(across(everything(),~sum(is.na(.x))))
-print(Num_NAs)</code></pre>
-<pre><code>## # A tibble: 1 × 4
-##   species bill_length_mm body_mass_g flipper_length_mm
-##     &lt;int&gt;          &lt;int&gt;       &lt;int&gt;             &lt;int&gt;
-## 1       0              2           2                 2</code></pre>
+<p>利用pivot_longer()函数</p>
+<pre class="r"><code>penguins_summary_wide&lt;-penguins_summary
+penguins_summary_narrow&lt;-penguins_summary_wide%&gt;%pivot_longer(c(bill,flipper,weight),names_to=&#39;property&#39;,values_to=&#39;value&#39;)
+penguins_summary_narrow</code></pre>
+<pre><code>## # A tibble: 9 × 3
+##   species   property  value
+##   &lt;fct&gt;     &lt;chr&gt;     &lt;dbl&gt;
+## 1 Adelie    bill       38.8
+## 2 Adelie    flipper   190  
+## 3 Adelie    weight   3701. 
+## 4 Chinstrap bill       48.8
+## 5 Chinstrap flipper   196. 
+## 6 Chinstrap weight   3733. 
+## 7 Gentoo    bill       47.5
+## 8 Gentoo    flipper   217. 
+## 9 Gentoo    weight   5076</code></pre>
 <ul>
-<li>combine across() and where() to perform column-wise operations for a
-subset of columns</li>
+<li><strong>Narrow to Wide data</strong></li>
 </ul>
-<pre class="r"><code>penguins2%&gt;% summarize(across(where(is.numeric),~mean(.x,na.rm=TRUE)))</code></pre>
-<pre><code>## # A tibble: 1 × 3
-##   bill_length_mm body_mass_g flipper_length_mm
-##            &lt;dbl&gt;       &lt;dbl&gt;             &lt;dbl&gt;
-## 1           43.9       4202.              201.</code></pre>
-<p>Combine the summarize,group_by and across functions to perform
-Column-wise summarizing by groups * ~mean(.x,na.rm=TRUE) is equivalent
-to function(x){mean(x,na.rm=TRUE)}</p>
-<pre class="r"><code>penguins%&gt;%select(-bill_length_mm)%&gt;%group_by(species)%&gt;%summarize(across(where(is.numeric),~mean(.x,na.rm=TRUE)))</code></pre>
-<pre><code>## # A tibble: 3 × 5
-##   species   bill_depth_mm flipper_length_mm body_mass_g  year
-##   &lt;fct&gt;             &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;
-## 1 Adelie             18.3              190.       3701. 2008.
-## 2 Chinstrap          18.4              196.       3733. 2008.
-## 3 Gentoo             15.0              217.       5076. 2008.</code></pre>
-</div>
-</div>
-<div id="joining-multiple-data-frames" class="section level3">
-<h3>6. Joining multiple data frames</h3>
+<p>利用pivot_wider()函数</p>
+<pre class="r"><code>penguins_summary_wide&lt;-penguins_summary_narrow%&gt;%pivot_wider(names_from=property,values_from=value)
+print(penguins_summary_wide)</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##   species    bill flipper weight
+##   &lt;fct&gt;     &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Adelie     38.8    190   3701.
+## 2 Chinstrap  48.8    196.  3733.
+## 3 Gentoo     47.5    217.  5076</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Uniting and separating data</li>
+</ol>
 <ul>
-<li>Combining multiple data frames</li>
-<li>using join() function</li>
+<li>Separate:separate a character column into multiple columns</li>
+<li>Unite: paste together multiple columns into one</li>
 </ul>
-<pre class="r"><code># first step:create data frame 1
-penguin_bill_lengths_df&lt;-penguins2%&gt;%arrange(desc(bill_length_mm))%&gt;%select(species,bill_length_mm)
-penguin_bill_lengths_df</code></pre>
-<pre><code>## # A tibble: 344 × 2
-##    species   bill_length_mm
-##    &lt;fct&gt;              &lt;dbl&gt;
-##  1 Gentoo              59.6
-##  2 Chinstrap           58  
-##  3 Gentoo              55.9
-##  4 Chinstrap           55.8
-##  5 Gentoo              55.1
-##  6 Gentoo              54.3
-##  7 Chinstrap           54.2
-##  8 Chinstrap           53.5
-##  9 Gentoo              53.4
-## 10 Chinstrap           52.8
-## # … with 334 more rows</code></pre>
-<pre class="r"><code># Second step:create data frame 2
-species&lt;-unique(penguins2$species)
-latin_name&lt;-c(&#39;Pygoscelis adeliae&#39;,&#39;Pygoscelis papua&#39;,&#39;Pygoscelis antarcticus&#39;)
-latin_names_df&lt;-data.frame(species,latin_name)
-print(latin_names_df)</code></pre>
-<pre><code>##     species             latin_name
-## 1    Adelie     Pygoscelis adeliae
-## 2    Gentoo       Pygoscelis papua
-## 3 Chinstrap Pygoscelis antarcticus</code></pre>
+<p><strong>Unite</strong></p>
 <ul>
-<li>Join–Inner join</li>
+<li>take advantages of unite() function.</li>
 </ul>
-<pre class="r"><code># Finally, combine these two data frames with a join fucntion
-penguin_bill_lengths_df%&gt;%inner_join(latin_names_df)</code></pre>
-<pre><code>## Joining, by = &quot;species&quot;</code></pre>
-<pre><code>## # A tibble: 344 × 3
-##    species   bill_length_mm latin_name            
-##    &lt;fct&gt;              &lt;dbl&gt; &lt;chr&gt;                 
-##  1 Gentoo              59.6 Pygoscelis papua      
-##  2 Chinstrap           58   Pygoscelis antarcticus
-##  3 Gentoo              55.9 Pygoscelis papua      
-##  4 Chinstrap           55.8 Pygoscelis antarcticus
-##  5 Gentoo              55.1 Pygoscelis papua      
-##  6 Gentoo              54.3 Pygoscelis papua      
-##  7 Chinstrap           54.2 Pygoscelis antarcticus
-##  8 Chinstrap           53.5 Pygoscelis antarcticus
-##  9 Gentoo              53.4 Pygoscelis papua      
-## 10 Chinstrap           52.8 Pygoscelis antarcticus
-## # … with 334 more rows</code></pre>
-<pre class="r"><code>#inner_join:只保留两表共有的关键字
-print(band_members)</code></pre>
-<pre><code>## # A tibble: 3 × 2
-##   name  band   
-##   &lt;chr&gt; &lt;chr&gt;  
-## 1 Mick  Stones 
-## 2 John  Beatles
-## 3 Paul  Beatles</code></pre>
-<pre class="r"><code>print(band_instruments)</code></pre>
-<pre><code>## # A tibble: 3 × 2
-##   name  plays 
-##   &lt;chr&gt; &lt;chr&gt; 
-## 1 John  guitar
-## 2 Paul  bass  
-## 3 Keith guitar</code></pre>
-<pre class="r"><code>inner_join(band_members,band_instruments)</code></pre>
+<pre class="r"><code>uni_df&lt;-penguins_summary%&gt;%
+  unite(flipper_over_weight,flipper,weight,sep=&#39;/&#39;)
+print(uni_df)</code></pre>
+<pre><code>## # A tibble: 3 × 3
+##   species    bill flipper_over_weight
+##   &lt;fct&gt;     &lt;dbl&gt; &lt;chr&gt;              
+## 1 Adelie     38.8 190/3700.7         
+## 2 Chinstrap  48.8 195.8/3733.1       
+## 3 Gentoo     47.5 217.2/5076</code></pre>
+<p><strong>Separate</strong></p>
+<ul>
+<li>take advantages of seperate() function.</li>
+</ul>
+<pre class="r"><code>sep_df&lt;-uni_df%&gt;%separate(flipper_over_weight,into=c(&quot;flipper&quot;,&quot;weight&quot;),sep=&quot;/&quot;)
+print(sep_df)</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##   species    bill flipper weight
+##   &lt;fct&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt; 
+## 1 Adelie     38.8 190     3700.7
+## 2 Chinstrap  48.8 195.8   3733.1
+## 3 Gentoo     47.5 217.2   5076</code></pre>
+<p><strong>Use “convert=TRUE” to convert columns into numeric
+types:</strong></p>
+<pre class="r"><code>sep_df_double&lt;-uni_df%&gt;%
+separate(flipper_over_weight,into=c(&quot;flipper&quot;,&quot;weight&quot;),sep=&quot;/&quot;,convert=TRUE)
+print(sep_df_double)</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##   species    bill flipper weight
+##   &lt;fct&gt;     &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Adelie     38.8    190   3701.
+## 2 Chinstrap  48.8    196.  3733.
+## 3 Gentoo     47.5    217.  5076</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Nesting and unnesting</li>
+</ol>
+<ul>
+<li>Nest:pack the data of each individual group into a table</li>
+<li>Unnest:flatten the tables back into regular columns(undo the nest
+operation)</li>
+</ul>
+<pre class="r"><code># Nesting
+musicians &lt;- full_join(band_members, band_instruments)</code></pre>
 <pre><code>## Joining, by = &quot;name&quot;</code></pre>
-<pre><code>## # A tibble: 2 × 3
-##   name  band    plays 
-##   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-## 1 John  Beatles guitar
-## 2 Paul  Beatles bass</code></pre>
-<ul>
-<li>Join–Outer Join</li>
-</ul>
-<pre class="r"><code>full_join(band_members,band_instruments)</code></pre>
-<pre><code>## Joining, by = &quot;name&quot;</code></pre>
+<pre class="r"><code>print(musicians)</code></pre>
 <pre><code>## # A tibble: 4 × 3
 ##   name  band    plays 
 ##   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
@@ -756,28 +515,242 @@ print(band_members)</code></pre>
 ## 2 John  Beatles guitar
 ## 3 Paul  Beatles bass  
 ## 4 Keith &lt;NA&gt;    guitar</code></pre>
-<ul>
-<li>Join–Left Join</li>
-</ul>
-<pre class="r"><code>left_join(band_members,band_instruments)</code></pre>
-<pre><code>## Joining, by = &quot;name&quot;</code></pre>
-<pre><code>## # A tibble: 3 × 3
+<pre class="r"><code>musicians_nest&lt;-musicians%&gt;%group_by(name)%&gt;%nest()
+print(musicians_nest)</code></pre>
+<pre><code>## # A tibble: 4 × 2
+## # Groups:   name [4]
+##   name  data            
+##   &lt;chr&gt; &lt;list&gt;          
+## 1 Mick  &lt;tibble [1 × 2]&gt;
+## 2 John  &lt;tibble [1 × 2]&gt;
+## 3 Paul  &lt;tibble [1 × 2]&gt;
+## 4 Keith &lt;tibble [1 × 2]&gt;</code></pre>
+<p><strong>Unnesting</strong></p>
+<pre class="r"><code>musicians_nest%&gt;%unnest(cols=data)</code></pre>
+<pre><code>## # A tibble: 4 × 3
+## # Groups:   name [4]
 ##   name  band    plays 
 ##   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
 ## 1 Mick  Stones  &lt;NA&gt;  
 ## 2 John  Beatles guitar
-## 3 Paul  Beatles bass</code></pre>
+## 3 Paul  Beatles bass  
+## 4 Keith &lt;NA&gt;    guitar</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Iteration based on the map function</li>
+</ol>
 <ul>
-<li>Join–Right Join</li>
+<li>using map() function</li>
+<li>The function map returns a list</li>
 </ul>
-<pre class="r"><code>right_join(band_members,band_instruments)</code></pre>
-<pre><code>## Joining, by = &quot;name&quot;</code></pre>
+<pre class="r"><code>is_div_2_3&lt;-function(x){
+  if(x%%2==0|x%%3==0){
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }
+}
+v&lt;-c(1,2,3,4,5,6)
+map(v,is_div_2_3)</code></pre>
+<pre><code>## [[1]]
+## [1] FALSE
+## 
+## [[2]]
+## [1] TRUE
+## 
+## [[3]]
+## [1] TRUE
+## 
+## [[4]]
+## [1] TRUE
+## 
+## [[5]]
+## [1] FALSE
+## 
+## [[6]]
+## [1] TRUE</code></pre>
+<ul>
+<li><em>map_lgl()</em> returns bolleans</li>
+<li><em>map_int()</em> return integers</li>
+<li><em>map_dbl()</em> return double</li>
+<li><em>map_chr()</em> return strings</li>
+</ul>
+<ol start="5" style="list-style-type: decimal">
+<li>Finding variables of maximal correlation(寻找最大相关变量)</li>
+</ol>
+<ol style="list-style-type: decimal">
+<li><p>Takes as input a data frame and a variable name (column
+name)</p></li>
+<li><p>Computes the correlation with all other numeric
+variables</p></li>
+<li><p>Returns the name of the variable with maximal absolute
+correlation, and the corresponding correlation.</p></li>
+</ol>
+<p>Recall that the correlation between vector <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> is defined as (Pearson formula): <span class="math display">\[
+\frac{\sum_1^{n}
+(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum_{i=1}^n(x_i-\bar{x})^2}
+\sqrt{\sum_{i=1}^n (y_i-\bar{y})^2} }
+\]</span></p>
+<p><strong>Start with a script for a specific case where</strong> * the
+dataset is the penguins dataset * the variable(column) name is
+‘body_mass_g’</p>
+<pre class="r"><code>col_name&lt;-&#39;body_mass_g&#39;
+df=penguins
+
+v_col&lt;-select(df,all_of(col_name)) # extract column based on col_name
+df_num&lt;-select_if(df,is.numeric)%&gt;%select(-all_of(col_name)) # select all numeric columns excluding col_name
+
+cor_func&lt;-function(x){cor(x,v_col,use=&#39;complete.obs&#39;)}# a function that computes cor between v_col and a vector
+
+correlations&lt;-unlist(map(df_num,cor_func))# compute correlations with all other numeric columns (with map)
+
+print(&#39;the computed correlations are:&#39;);print(correlations)</code></pre>
+<pre><code>## [1] &quot;the computed correlations are:&quot;</code></pre>
+<pre><code>##    bill_length_mm     bill_depth_mm flipper_length_mm              year 
+##        0.59510982       -0.47191562        0.87120177        0.04220939</code></pre>
+<pre class="r"><code>max_abs_cor_var&lt;-names(which(abs(correlations)==max(abs(correlations)))) # extract the name of the column with max correlation
+
+cor_val&lt;-as.double(correlations[max_abs_cor_var])
+
+print(&#39;\ncolumn with maximal correlation:&#39;);print(max_abs_cor_var);</code></pre>
+<pre><code>## [1] &quot;\ncolumn with maximal correlation:&quot;</code></pre>
+<pre><code>## [1] &quot;flipper_length_mm&quot;</code></pre>
+<pre class="r"><code>print(cor_val)</code></pre>
+<pre><code>## [1] 0.8712018</code></pre>
+<p>Define a function called <strong>max_cor_var</strong>, the body of
+this function is copied from the previous script:</p>
+<pre class="r"><code>max_cor_var&lt;-function(df,col_name){
+   v_col &lt;- select(df, all_of(col_name)) # extract column based on col_name
+  df_num &lt;- select_if(df, is.numeric) %&gt;% select(-all_of(col_name)) # select all numeric columns excluding col_name
+  
+  cor_func &lt;- function(x){ cor(x, v_col, use=&#39;complete.obs&#39;) } # a function that computes cor between v_col and a vector
+  correlations &lt;- unlist(map(df_num, cor_func)) # compute correlations with all other numeric columns (with map)
+
+  max_abs_cor_var &lt;- names( which( abs(correlations)==max(abs(correlations))  ) ) # extract the name of the column with max correlation
+  cor_val &lt;- as.double(correlations[max_abs_cor_var])
+  
+  return (data.frame(var_name=max_abs_cor_var, cor=cor_val)) # return as a data frame 
+}
+
+max_cor_var(penguins,&quot;body_mass_g&quot;)</code></pre>
+<pre><code>##            var_name       cor
+## 1 flipper_length_mm 0.8712018</code></pre>
+<p>The idea is to use nest() and unnest() to transform the groups into
+tables, then the apply <strong>max_cor_var</strong> to each of the
+tables</p>
+<pre class="r"><code>cor_by_group&lt;-penguins%&gt;%
+  group_by(species)%&gt;%
+  nest()%&gt;%
+  mutate(max_cor=map(data,function(x){max_cor_var(x,&#39;body_mass_g&#39;)}))
+print(cor_by_group)</code></pre>
 <pre><code>## # A tibble: 3 × 3
-##   name  band    plays 
-##   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-## 1 John  Beatles guitar
-## 2 Paul  Beatles bass  
-## 3 Keith &lt;NA&gt;    guitar</code></pre>
+## # Groups:   species [3]
+##   species   data               max_cor     
+##   &lt;fct&gt;     &lt;list&gt;             &lt;list&gt;      
+## 1 Adelie    &lt;tibble [152 × 7]&gt; &lt;df [1 × 2]&gt;
+## 2 Gentoo    &lt;tibble [124 × 7]&gt; &lt;df [1 × 2]&gt;
+## 3 Chinstrap &lt;tibble [68 × 7]&gt;  &lt;df [1 × 2]&gt;</code></pre>
+<ol start="6" style="list-style-type: decimal">
+<li>Missing data</li>
+</ol>
+<p>Stocks:</p>
+<ul>
+<li>The NA value here represents a missing value</li>
+</ul>
+<pre class="r"><code>stocks&lt;-tibble(
+  year=c(2015,2015,2015,2015,2016,2016,2016),
+  qtr=c(1,2,3,4,2,3,4),
+  return=c(1.88,0.59,0.35,NA,0.92,0.17,2.66)
+)
+print(stocks)</code></pre>
+<pre><code>## # A tibble: 7 × 3
+##    year   qtr return
+##   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2015     1   1.88
+## 2  2015     2   0.59
+## 3  2015     3   0.35
+## 4  2015     4  NA   
+## 5  2016     2   0.92
+## 6  2016     3   0.17
+## 7  2016     4   2.66</code></pre>
+<div id="two-types-of-missing-data" class="section level4">
+<h4>Two types of missing data</h4>
+<ol style="list-style-type: decimal">
+<li>Explicit missing <a href="data:The" class="uri">data:The</a> value
+of an individual variable is replaced with “NA”</li>
+<li>Implicit missing date:The entire row is missing. e.g.,the row
+corresponding to the first quarter of 2016 is missing.</li>
+</ol>
+<ul>
+<li>To make the implicit missing data explicit, we can insert rows that
+include NA values.</li>
+<li>using the complete() function</li>
+<li>The complete() function takes a set of columns and finds all unique
+combinations.</li>
+</ul>
+<pre class="r"><code>complete(stocks,year,qtr)</code></pre>
+<pre><code>## # A tibble: 8 × 3
+##    year   qtr return
+##   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2015     1   1.88
+## 2  2015     2   0.59
+## 3  2015     3   0.35
+## 4  2015     4  NA   
+## 5  2016     1  NA   
+## 6  2016     2   0.92
+## 7  2016     3   0.17
+## 8  2016     4   2.66</code></pre>
+<ul>
+<li>find the row with missing values using the function complete cases,
+which returns a logical vector indicating which cases are
+complete.第四行数据缺少值</li>
+</ul>
+<pre class="r"><code>complete.cases(stocks)</code></pre>
+<pre><code>## [1]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE</code></pre>
+</div>
+<div id="removing-the-incomplete-cases" class="section level4">
+<h4>Removing the incomplete cases</h4>
+<pre class="r"><code>filter(stocks,complete.cases(stocks))</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##    year   qtr return
+##   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2015     1   1.88
+## 2  2015     2   0.59
+## 3  2015     3   0.35
+## 4  2016     2   0.92
+## 5  2016     3   0.17
+## 6  2016     4   2.66</code></pre>
+</div>
+<div id="replacing-the-missing-values" class="section level4">
+<h4>Replacing the missing values</h4>
+<pre class="r"><code>replace_by_mean&lt;-function(x){
+  mu&lt;-mean(x,na.rm=TRUE)
+  impute_f&lt;-function(z){
+    if(is.na(z)){
+      return (mu)
+    }else{
+      return(z)
+    }
+  }
+  return(map_dbl(x,impute_f))
+}
+
+x&lt;-c(1,2,NA,4)
+replace_by_mean(x)</code></pre>
+<pre><code>## [1] 1.000000 2.000000 2.333333 4.000000</code></pre>
+<p>Note:here we have used the <em>mutate()</em> function to create a new
+column called returned</p>
+<pre class="r"><code>mutate(stocks,return=replace_by_mean(return))</code></pre>
+<pre><code>## # A tibble: 7 × 3
+##    year   qtr return
+##   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1  2015     1   1.88
+## 2  2015     2   0.59
+## 3  2015     3   0.35
+## 4  2015     4   1.10
+## 5  2016     2   0.92
+## 6  2016     3   0.17
+## 7  2016     4   2.66</code></pre>
+</div>
 </div>
 </div>
 

@@ -29,7 +29,9 @@ univar_plot+geom_histogram(binwidth=5)+ylab("Count")
 ```{r}
 univar_plot+geom_density(adjust=1)+ylab('Density')
 ```
+
 ## Bivariate plots
+* 其中theme_bw()是主题模板
 
 ```{r}
 ggplot(data=rename(penguins,Species=species),aes(x=flipper_length_mm,color=Species))+geom_density()+theme_bw()+xlab("Flipper length(mm)")+ylab("Density")
@@ -68,6 +70,7 @@ mass_flipper_scatter+geom_text(aes(label=species,color=species))+guides(color=gu
 ```
 
 ## Facets
+* leverage the function **facet_wrap()** to create multiple panels
 ```{r}
 mass_flipper_scatter+geom_point()+facet_wrap(~species)
 ```

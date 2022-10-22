@@ -1,12 +1,12 @@
 ---
 title: "R Notebook"
 output:
-  word_document: default
   html_document:
     df_print: paged
+  word_document: default
 ---
 
-The code chunk appears:
+## Vector
 ```{r}
 x<-c(3,7,4,2,1,2,-4,-5)
 x
@@ -37,9 +37,12 @@ a<-c(TRUE,3,"Bristol")   #You can't have a vector of mixed type!!!!
 a
 #they are all characters
 ```
+
+* 查看vector的type
 ```{r}
 mode(a)  # You can test the type like this
 ```
+## 创建矩阵Matrix
 ```{r}
 M<-matrix(seq(10),2,5)
 M
@@ -51,6 +54,8 @@ M[2,3] #The third element of the second row
 ```{r}
 M[,4]
 ```
+
+* 判断是否是vector的类型
 ```{r}
 is.vector(M[2,])
 ```
@@ -82,6 +87,7 @@ first_data_frame
 ((4+2-1)*4/2)^2
 ```
 ```{r}
+#在sample中，replace=TRUE代表一个样本可以出现好几次
 a<-matrix(sample(1:10,6,replace=T),2,3) #a random 2 by 3 matrix
 a
 b<-matrix(sample(1:10,6,replace=T),2,3)
@@ -110,6 +116,8 @@ a&b
 ```{r}
 a|b
 ```
+
+* 异或运算：值不相等时为真
 ```{r}
 xor(a,b)
 ```

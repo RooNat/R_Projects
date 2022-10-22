@@ -94,6 +94,7 @@ M_YX
 ### about solve()
 use ?solve() to check the usage of solve()
 
+solve(Y,X) means $Y^{-1}\cdot X$
 ```{r}
 result<-solve(Y,X)
 result
